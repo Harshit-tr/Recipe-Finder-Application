@@ -7,8 +7,11 @@ import {
   Collapse,
 } from "@mui/material";
 import axios from "axios";
+import DrawerAppBar from "./navbar";
+import RecipeCard from "./recipescard";
+import ImageSlider from "./swipper";
 
-const Recipes = ( { searchQuery } ) => {
+const Recipes = ( { searchQuery = "" } ) => {
   const [recipes, setRecipes] = useState([]);
   const [expandedId, setExpandedId] = useState(null);
 
@@ -22,39 +25,22 @@ const Recipes = ( { searchQuery } ) => {
     setExpandedId(expandedId === id ? null : id);
   };
   const filteredRecipes = recipes.filter((recipe) =>
-    recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
+    recipe.name.toLowerCase().includes(searchQuery.toLowerCase())  
   );
-
 
   return (
     <>
+     <ImageSlider />
        <h1 style={styles.heading}>Recipes</h1>
     <div style={styles.container}>
       {filteredRecipes.length > 0 ? (
         filteredRecipes.map((recipe) => (
-          <Card key={recipe._id} sx={styles.card}>
-            <CardContent>
-              <Typography variant="h6" sx={styles.title}>
-                {recipe.name}
-              </Typography>
-            </CardContent>
-
-            <Collapse in={expandedId === recipe._id} timeout="auto" unmountOnExit>
-              <CardContent>
-                <Typography variant="body1" sx={styles.details}>
-                  {recipe.instructions}
-                </Typography>
-              </CardContent>
-            </Collapse>
-
-            <Button
-              size="small"
-              onClick={() => handleExpand(recipe._id)}
-              sx={styles.button}
-            >
-              {expandedId === recipe._id ? "Collapse" : "Expand"}
-            </Button>
-          </Card>
+        <RecipeCard 
+        key={recipe._id}
+        recipe={recipe}
+        expandedId={expandedId}
+        handleExpand={handleExpand}
+        />
         ))
       ) : (
         <Typography variant="h6" sx={{ color: "red" }}>No recipes found</Typography>

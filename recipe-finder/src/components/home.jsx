@@ -1,143 +1,68 @@
-import * as React from "react";
-import PropTypes from "prop-types";
-import {
-  AppBar,
-  Box,
-  CssBaseline,
-  Divider,
-  Drawer,
-  IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Toolbar,
-  Typography,
-  Button,
-  InputBase,
-} from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import SearchIcon from "@mui/icons-material/Search";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import RecipeCard from "./recipescard";
+import { Typography, Container, Grid } from "@mui/material";
+import DrawerAppBar from "./navbar";
 import ImageSlider from "./swipper";
-import Recipes from "./recipes";
+export default function Home() {
+  const [recipes, setRecipes] = useState([]);
+  const [search, setSearch] = useState(""); 
+  const [expandedId, setExpandedId] = useState(null);
 
-const drawerWidth = 240;
-const navItems = ["Home", "Recipes", "Categories", "Favorites", "Contact"];
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/recipes")
+      .then((response) => setRecipes(response.data))
+      .catch((error) => console.error("Error fetching recipes:", error));
+  }, []);
 
-function DrawerAppBar(props) {
-  const { window } = props;
-  const [mobileOpen, setMobileOpen] = React.useState(false);
-  const [search, setSearch] = React.useState("");
-
-  const handleDrawerToggle = () => {
-    setMobileOpen((prevState) => !prevState);
+  const handleExpand = (id) => {
+    setExpandedId(expandedId === id ? null : id);
   };
 
-  const drawer = (
-    <Box onClick={handleDrawerToggle} sx={{ textAlign: "center" }}>
-      <Typography variant="h6" sx={{ my: 2 }}>
-        Recipe App
-      </Typography>
-      <Divider />
-      <List>
-        {navItems.map((item) => (
-          <ListItem key={item} disablePadding>
-            <ListItemButton sx={{ textAlign: "center" }}>
-              <ListItemText primary={item} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-    </Box>
+  const filteredRecipes = recipes.filter((recipe) =>
+    recipe.name.toLowerCase().includes(search.toLowerCase()) 
   );
-
-  const container =
-    window !== undefined ? () => window().document.body : undefined;
 
   return (
     <>
-      <Box sx={{ display: "flex" }}>
-        <CssBaseline />
-        <AppBar component="nav" sx={{ backgroundColor: "#FF5722" }}>
-          <Toolbar>
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              edge="start"
-              onClick={handleDrawerToggle}
-              sx={{ mr: 2, display: { sm: "none" } }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography
-              variant="h6"
-              component="div"
-              sx={{ flexGrow: 1, display: { xs: "none", sm: "block" } }}
-            >
-              Recipe App
+     <ImageSlider />
+    <div>
+      <DrawerAppBar setSearch={setSearch} />
+      <Container>
+        <Typography variant="h4" sx={styles.heading}>Trending Recipes</Typography>
+        <Grid container spacing={3}>
+          {filteredRecipes.length > 0 ? (
+            filteredRecipes.map((recipe) => (
+              <Grid item xs={12} sm={6} md={4} key={recipe._id}>
+                <RecipeCard
+                  recipe={recipe}
+                  expandedId={expandedId}
+                  handleExpand={handleExpand}
+                />
+              </Grid>
+            ))
+          ) : (
+            <Typography sx={{ textAlign: "center", color: "gray", mt: 3 }}>
+              No recipes found.
             </Typography>
-
-            {/* Navigation Links */}
-            <Box sx={{ display: { xs: "none", sm: "block" } }}>
-              {navItems.map((item) => (
-                <Button key={item} sx={{ color: "#fff" }}>
-                  {item}
-                </Button>
-              ))}
-            </Box>
-            {/* Search Bar */}
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                backgroundColor: "rgba(255,255,255,0.2)",
-                borderRadius: 1,
-                padding: "2px 10px",
-                marginRight: 2,
-              }}
-            >
-              <SearchIcon />
-              <InputBase
-                placeholder="Search Recipes..."
-                sx={{ ml: 1, color: "inherit" }}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </Box>
-          </Toolbar>
-        </AppBar>
-
-        <nav>
-          <Drawer
-            container={container}
-            variant="temporary"
-            open={mobileOpen}
-            onClose={handleDrawerToggle}
-            ModalProps={{ keepMounted: true }}
-            sx={{
-              display: { xs: "block", sm: "none" },
-              "& .MuiDrawer-paper": {
-                boxSizing: "border-box",
-                width: drawerWidth,
-              },
-            }}
-          >
-            {drawer}
-          </Drawer>
-        </nav>
-
-        <Box component="main" sx={{ p: 3 }}>
-          <Toolbar />
-        </Box>
-      </Box>
-      <ImageSlider />
-      <Recipes searchQuery={search}/>
+          )}
+        </Grid>
+      </Container>
+     
+    </div>
+   
     </>
   );
 }
 
-DrawerAppBar.propTypes = {
-  window: PropTypes.func,
+const styles = {
+  heading: {
+    fontSize: "2rem",
+    fontWeight: "bold",
+    color: "#d35400",
+    margin: "30px 0",
+    textAlign: "center",
+  },
 };
 
-export default DrawerAppBar;
