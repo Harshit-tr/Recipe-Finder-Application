@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import RecipeCard from "./recipescard";
 import { Typography, Container, Grid } from "@mui/material";
 import DrawerAppBar from "./navbar";
 import ImageSlider from "./swipper";
+import { fetchRecipes } from "../utils/api"; 
 export default function Home() {
   const [recipes, setRecipes] = useState([]);
   const [search, setSearch] = useState(""); 
   const [expandedId, setExpandedId] = useState(null);
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/recipes")
-      .then((response) => setRecipes(response.data))
-      .catch((error) => console.error("Error fetching recipes:", error));
+    fetchRecipes().then(setRecipes).catch(console.error);
   }, []);
+  
 
   const handleExpand = (id) => {
     setExpandedId(expandedId === id ? null : id);

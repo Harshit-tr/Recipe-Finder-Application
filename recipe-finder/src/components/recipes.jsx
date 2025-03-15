@@ -6,20 +6,18 @@ import {
   Button,
   Collapse,
 } from "@mui/material";
-import axios from "axios";
 import DrawerAppBar from "./navbar";
 import RecipeCard from "./recipescard";
 import ImageSlider from "./swipper";
-
+import { fetchRecipes } from "../utils/api"; 
 const Recipes = ( { searchQuery = "" } ) => {
   const [recipes, setRecipes] = useState([]);
   const [expandedId, setExpandedId] = useState(null);
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/recipes")
-      .then((response) => setRecipes(response.data))
-      .catch((error) => console.error("Error fetching recipes:", error));
+    fetchRecipes().then(setRecipes).catch(console.error);
   }, []);
+  
 
   const handleExpand = (id) => {
     setExpandedId(expandedId === id ? null : id);
